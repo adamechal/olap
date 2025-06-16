@@ -1,0 +1,45 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+
+  cube:
+    image: cubejs/cube:latest
+    container_name: cube
+    ports:
+      - "4000:4000"
+    environment:
+      CUBEJS_DB_TYPE: mysql
+      CUBEJS_DB_HOST: mysql
+      CUBEJS_DB_PORT: 3306
+      CUBEJS_DB_NAME: vgsales
+      CUBEJS_DB_USER: root
+      CUBEJS_DB_PASS: root
+      CUBEJS_DEV_MODE: true
+    volumes:
+      - ./cube:/cube/conf
+    depends_on:
+      - mysql
+
+volumes:
+  mysql_data:
